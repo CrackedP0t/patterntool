@@ -1,0 +1,49 @@
+.edit {
+	font-size: 15pt;
+	outline: 2pt solid navy;
+	outline-offset: 5px;
+}
+
+#test {
+	height: 200px;
+}
+
+.group[data-level="0"] {
+	border: thin solid black
+}
+
+.group[data-level="1"] {
+	background-color: #966FD6;
+}
+
+.group[data-level="2"] {
+	background-color: #B19CD9;
+}
+
+.group[data-level="3"] {
+	background-color: #779ECB;
+}
+
+.group[data-level="4"] {
+	background-color: #AEC6CF;
+}
+
+.group[data-level="5"] {
+	background-color: #77DD77;
+}
+
+.group[data-level="6"] {
+	background-color: #FDFD96;
+}
+
+.group[data-level="7"] {
+	background-color: #FFB347;
+}
+
+.group[data-level="8"] {
+	background-color: #FFD1DC;
+}
+
+.group[data-level="9"] {
+	background-color: #FF6961;
+}

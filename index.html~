@@ -1,0 +1,10 @@
+<link rel="stylesheet" type="text/css" href="/static/patterns.css" />
+<h2>Pattern tester</h2>
+<h3>Run:</h3>
+<code><div class="edit" id="pattern" contenteditable="true" spellcheck="false">Edit</div></code>
+<h3>On:</h3>
+<code><div class="edit" id="test" contenteditable="true" spellcheck="false">Edit</div></code>
+<br />
+<script src="/static/rangy-core.js"></script>
+<script src="/static/rangy-selectionsaverestore.js"></script>
+<script src="/static/patterns.js"></script>

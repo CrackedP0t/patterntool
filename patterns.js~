@@ -1,0 +1,73 @@
+var $ = function(s) {return document.querySelector(s)};
+
+var patternBox = $("#pattern");
+var testBox = $("#test");
+var poses = []
+var matchXHR = {}
+
+var prepTest = function(pattern, test) {
+	var code = "local going = true\n\
+local poses = {}\n\
+local s, e = 0, 0\n\
+while going do\n\
+s, e = string.find('" + test + "', '" + pattern + "', e + 1)\n\
+if s then\n\
+going = true\n\
+table.insert(poses, {s, e})\n\
+else\n\
+going = false\n\
+end\n\
+end\n\
+return poses"
+	return encodeURIComponent(code)
+}
+
+var updateTest = function() {
+	// testBox.data("hwt").handleInput();
+	var sel = window.getSelection();
+	var manageSel = sel.anchorNode == testBox;
+	var text = testBox.textContent;
+	var last = 0;
+	var newHTML = "";
+	for (var i = 0; i < poses.length; i++) {
+		newHTML = newHTML + text.slice(last, poses[i][0]) +
+			"<mark>" + text.slice(poses[i][0], poses[i][1]) + "</mark>";
+		last = poses[i][1];
+	}
+	newHTML = newHTML + text.slice(last, text.length);
+	testBox.innerHTML = newHTML;
+}
+
+var getMatch = function() {
+	var pattern = patternBox.textContent;
+	var test = testBox.textContent;
+	if (pattern.length > 0 && test.length > 0) {
+		matchXHR.onload = function(){};
+		matchXHR = new XMLHttpRequest();
+		matchXHR.open("GET", "/run?code=" + prepTest(pattern, test), true);
+		matchXHR.onload = function() {
+			var resp = JSON.parse(matchXHR.responseText);
+			if (resp.success) {
+				poses = JSON.parse(resp.returns);
+				if (!Array.isArray(poses)) {
+					poses = [];
+				}
+				for (var i = 0; i < poses.length; i++) {
+					poses[i][0]--;
+				}
+			} else {
+				poses = [];
+			}
+			updateTest();
+		}
+		matchXHR.send();
+	} else {
+		poses = [];
+		updateTest();
+	}
+}
+
+patternBox.oninput = getMatch;
+testBox.oninput = getMatch;
+
+getMatch();
