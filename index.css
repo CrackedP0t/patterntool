@@ -2,10 +2,8 @@
 	font-size: 15pt;
 	outline: 2pt solid navy;
 	outline-offset: 5px;
-}
-
-#test {
-	height: 200px;
+	word-wrap: break-word;
+	width: 100%;
 }
 
 .group[data-level="0"] {
