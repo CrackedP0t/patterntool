@@ -14,7 +14,6 @@ local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
 end\n\
-print(test, cursor)\n\
 local out = test:gsub(newPattern, function(...)\n\
 						  local captures = {...}\n\
 						  local pos = table.remove(captures, 1)\n\
@@ -51,7 +50,6 @@ while apos <= cursor do\n\
 end\n\
 out = out:sub(0, i - 1) .. "|" .. out:sub(i)\n\
 end\n\
-print(out)\n\
 return out\n\
 end)\n\
 end';
