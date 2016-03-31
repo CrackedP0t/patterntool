@@ -16,7 +16,7 @@ else\n\
 return test\n\
 end\n\
 end\n\
-local newPattern = "()" .. pattern:gsub("[^%%][()]", "()") .. "()"\n\
+local newPattern = "()" .. pattern:gsub("[^%%][()]", "()"):gsub("^%(", "()") .. "()"\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
