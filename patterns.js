@@ -10,14 +10,13 @@ var prepTest = function() {
 	var code = 'function(pattern, test, cursor)\n\
 return pcall(function()\n\
 if not test:find(pattern) then\n\
-print(test, pattern)\n\
 if cursor > -1 then\n\
 return test:sub(0, cursor) .. "|" .. test:sub(cursor + 1)\n\
 else\n\
 return test\n\
 end\n\
 end\n\
-local newPattern = "()" .. pattern:gsub("[()]", "()") .. "()"\n\
+local newPattern = "()" .. pattern:gsub("[^%%][()]", "()") .. "()"\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
