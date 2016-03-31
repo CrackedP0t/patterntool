@@ -2,16 +2,19 @@ var $ = function(s) {return document.querySelector(s)};
 
 var patternBox = $("#pattern");
 var testBox = $("#test");
+var errorSpan = $("#error");
 
 Lua.initialize();
 
 var prepTest = function() {
 	var code = 'function(pattern, test, cursor)\n\
+return pcall(function()\n\
 local newPattern = "()" .. pattern:gsub("[()]", "()") .. "()"\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
 end\n\
+print(test, cursor)\n\
 local out = test:gsub(newPattern, function(...)\n\
 						  local captures = {...}\n\
 						  local pos = table.remove(captures, 1)\n\
@@ -48,7 +51,9 @@ while apos <= cursor do\n\
 end\n\
 out = out:sub(0, i - 1) .. "|" .. out:sub(i)\n\
 end\n\
+print(out)\n\
 return out\n\
+end)\n\
 end';
 	return code;
 }
@@ -58,17 +63,28 @@ var updateTest = function() {
 	var pattern = patternBox.textContent;
 	var sel = rangy.saveSelection();
 	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
-	var cursor = testBox.innerHTML.replace(/<span class="group".*?>|<\/span>/g, "").indexOf("<");
+	var cursor = testBox.innerHTML
+		.replace(/<span class="group".*?>|<\/span>/g, "")
+		.replace(/&nbsp;/, " ")
+		.indexOf("<");
 	var res = Lua.eval(prepTest())[0](pattern, test, cursor);
-	var newHTML = res[0];
-	newHTML = newHTML
-		.replace(/ /g, "&nbsp;")
-		.replace(/{/g, '<span class="group" data-level="0">')
-		.replace(/}/g, "</span>")
-		.replace(/\|/g, '<span id="' + sspanid + '"></span>')
-		.replace(/\[(\d)\)/g, '<span class="group" data-level="$1">')
-		.replace(/\]/g, '</span>');
-	testBox.innerHTML = newHTML;
+	var worked = res[0];
+	if (worked) {
+		errorSpan.style.display = "none";
+		var newHTML = res[1];
+		newHTML = newHTML
+			.replace(/ /g, "&nbsp;")
+			.replace(/{/g, '<span class="group" data-level="0">')
+			.replace(/}/g, "</span>")
+			.replace(/\|/g, '<span id="' + sspanid + '"></span>')
+			.replace(/\[(\d)\)/g, '<span class="group" data-level="$1">')
+			.replace(/\]/g, '</span>');
+		testBox.innerHTML = newHTML;
+	} else {
+		errorSpan.style.display = "inline";
+		errorSpan.innerHTML = "Error: " + res[1].replace(/.*?:.*?: /, "");
+		testBox.innerHTML = test.replace(/ /g, "&nbsp;");
+	}
 	rangy.restoreSelection(sel);
 }
 

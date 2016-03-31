@@ -6,6 +6,13 @@
 	width: 100%;
 }
 
+#error {
+	background-color: LightCoral;
+	color: DarkRed;
+	border: 2pt solid DarkRed;
+	border-radius: 5pt;
+}
+
 .group[data-level="0"] {
 	border: thin solid black
 }
