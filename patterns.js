@@ -100,8 +100,7 @@ function updatePattern() {
 	}
 }
 
-var getMatch = function(ev) {
-	console.log(ev);
+var getMatch = function() {
 	updateTest();
 	updatePattern();
 }
