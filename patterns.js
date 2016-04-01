@@ -93,8 +93,17 @@ var updateTest = function() {
 	rangy.restoreSelection(sel);
 }
 
-var getMatch = function() {
+function updatePattern() {
+	var br = $("#pattern > br")
+	if (br) {
+		patternBox.removeChild(br);
+	}
+}
+
+var getMatch = function(ev) {
+	console.log(ev);
 	updateTest();
+	updatePattern();
 }
 
 patternBox.oninput = getMatch;

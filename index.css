@@ -3,7 +3,16 @@
 	outline: 2pt solid navy;
 	outline-offset: 5px;
 	word-wrap: break-word;
-	width: 100%;
+}
+
+#pattern:empty:before {
+	content: "Pattern to use";
+	color: grey;
+}
+
+#test:empty:before {
+	content: "Text to be tested";
+	color: grey;
 }
 
 #error {
@@ -14,7 +23,7 @@
 }
 
 .group[data-level="0"] {
-	border: thin solid black
+	outline: thin solid black
 }
 
 .group[data-level="1"] {
