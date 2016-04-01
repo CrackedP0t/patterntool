@@ -16,6 +16,9 @@ else\n\
 return test\n\
 end\n\
 end\n\
+if test:find("[%[{}]") then\n\
+error("The characters [{} cannot be tested against on this site")\n\
+end\n\
 local newPattern = "()" .. pattern:gsub("[^%%][()]", "()"):gsub("^%(", "()") .. "()"\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
@@ -70,7 +73,7 @@ var updateTest = function() {
 	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
 	var cursor = testBox.innerHTML
 		.replace(/<span class="group".*?>|<\/span>/g, "")
-		.replace(/&nbsp;/, " ")
+		.replace(/&nbsp;/g, " ")
 		.indexOf("<");
 	var res = Lua.eval(prepTest())[0](pattern, test, cursor);
 	var worked = res[0];
@@ -88,7 +91,9 @@ var updateTest = function() {
 	} else {
 		errorSpan.style.display = "inline";
 		errorSpan.innerHTML = "Error: " + res[1].replace(/.*?:.*?: /, "");
-		testBox.innerHTML = test.replace(/ /g, "&nbsp;");
+		testBox.innerHTML = testBox.innerHTML
+			.replace(/ (?!([^<]+)?>)/g, "&nbsp;")
+			.replace(/<span class="group".*?>|<\/span>/g, "");
 	}
 	rangy.restoreSelection(sel);
 }
