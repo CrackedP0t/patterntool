@@ -1,5 +1,24 @@
 var $ = function(s) {return document.querySelector(s)};
 
+var escapes = {
+	"a": "Any letter",
+	"A": "Any non-letter character",
+	"c": "Any control character",
+	"C": "Any non-control character",
+	"d": "Any digit",
+	"D": "Any non-digit",
+	"g": "Any non-space character",
+	"G": "The space character",
+	"l": "Any lowercase letter",
+	"L": "Any non-lowercase character",
+	"u": "Any uppercase letter",
+	"U": "Any non-uppercase character",
+	"x": "Any hexadecimal digit",
+	"X": "Any non-hexadecimal character",
+	"w": "Any alphanumeric character",
+	"W": "Any non-alphanumeric character"
+}
+
 var patternBox = $("#pattern");
 var testBox = $("#test");
 var errorSpan = $("#error");
@@ -19,7 +38,8 @@ end\n\
 if test:find("[%[{}]") then\n\
 error("The characters [{} cannot be tested against on this site")\n\
 end\n\
-local newPattern = "()" .. pattern:gsub("[^%%][()]", "()"):gsub("^%(", "()") .. "()"\n\
+local newPattern = "()" .. pattern:gsub("([^%%])[()]", "%1()"):gsub("^%(", "()") .. "()"\n\
+print(newPattern)\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
@@ -99,7 +119,22 @@ var updateTest = function() {
 }
 
 function updatePattern() {
-	var br = $("#pattern > br")
+	var text = patternBox.textContent;
+	var newHTML = text;
+
+	function makeSpan(title, text) {
+		return '<span class="doc" title="' + title + '">' + text + '</span>';
+	}
+	
+	patternBox.innerHTML = newHTML
+		.replace(/%(.)(?!([^<]+)?>)/g, function(match, cap) {
+			if (escapes[cap]) {
+				return makeSpan(escapes[cap], match);
+			} else {
+				return makeSpan('The character \'' + cap + '\'"', match);
+			}
+		});
+	var br = $("#pattern > br");
 	if (br) {
 		patternBox.removeChild(br);
 	}

@@ -22,6 +22,14 @@
 	border-radius: 5pt;
 }
 
+.doc {
+	color: green;
+}
+
+.doc:hover {
+	outline: thin solid green;
+}
+
 .group[data-level="0"] {
 	outline: thin solid black
 }
