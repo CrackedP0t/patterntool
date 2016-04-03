@@ -1,4 +1,4 @@
-var $ = function(s) {return document.querySelector(s)};
+var $ = function(s) {return document.querySelector(s);};
 
 var escapes = {
 	"a": "Any letter",
@@ -17,7 +17,7 @@ var escapes = {
 	"X": "Any non-hexadecimal character",
 	"w": "Any alphanumeric character",
 	"W": "Any non-alphanumeric character"
-}
+};
 
 var patternBox = $("#pattern");
 var testBox = $("#test");
@@ -25,7 +25,7 @@ var errorSpan = $("#error");
 
 Lua.initialize();
 
-var prepTest = function() {
+function prepTest() {
 	var code = 'function(pattern, test, cursor)\n\
 return pcall(function()\n\
 if not test:find(pattern) then\n\
@@ -86,15 +86,15 @@ end';
 	return code;
 }
 
-var updateTest = function() {
+function updateTest() {
 	var test = testBox.textContent.replace(/\u00A0/g, " ");
 	var pattern = patternBox.textContent;
 	var sel = rangy.saveSelection();
 	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
 	var cursor = testBox.innerHTML
-		.replace(/<span class="group".*?>|<\/span>/g, "")
-		.replace(/&nbsp;/g, " ")
-		.indexOf("<");
+			.replace(/<span class="group".*?>|<\/span>/g, "")
+			.replace(/&nbsp;/g, " ")
+			.indexOf("<");
 	var res = Lua.eval(prepTest())[0](pattern, test, cursor);
 	var worked = res[0];
 	if (worked) {
@@ -120,27 +120,40 @@ var updateTest = function() {
 
 function updatePattern() {
 	var text = patternBox.textContent;
+	var sel = rangy.saveSelection();
+	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
+	var cursor = patternBox.innerHTML
+			.replace(/<span class="group".*?>|<\/span>/g, "")
+			.replace(/&nbsp;/g, " ")
+			.indexOf("<");
+	
 	var newHTML = text;
 
 	function makeSpan(title, text) {
 		return '<span class="doc" title="' + title + '">' + text + '</span>';
 	}
+
+	newHTML = newHTML.slice(0, cursor)
+		+ '<span id="' + sspanid + '"></span>'
+		+ newHTML.slice(cursor);
 	
 	patternBox.innerHTML = newHTML
-		.replace(/%(.)(?!([^<]+)?>)/g, function(match, cap) {
-			if (escapes[cap]) {
-				return makeSpan(escapes[cap], match);
-			} else {
-				return makeSpan('The character \'' + cap + '\'"', match);
-			}
-		});
+		.replace(new RegExp('%(?:<span id="' + sspanid + '"><\/span>)?(.)', 'g'),
+				 function(match, cap) {
+					 if (escapes[cap]) {
+						 return makeSpan(escapes[cap], match);
+					 } else {
+						 return makeSpan('The character \'' + cap + '\'"', match);
+					 }
+				 });
 	var br = $("#pattern > br");
 	if (br) {
 		patternBox.removeChild(br);
 	}
+	rangy.restoreSelection(sel);
 }
 
-var getMatch = function() {
+function getMatch() {
 	updateTest();
 	updatePattern();
 }
