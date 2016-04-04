@@ -138,7 +138,7 @@ function updatePattern() {
 		+ newHTML.slice(cursor);
 	
 	patternBox.innerHTML = newHTML
-		.replace(new RegExp('%(?:<span id="' + sspanid + '"><\/span>)?(.)', 'g'),
+		.replace(new RegExp('%(?:<span id="' + sspanid + '"><\/span>)?(\\w)', 'g'),
 				 function(match, cap) {
 					 if (escapes[cap]) {
 						 return makeSpan(escapes[cap], match);
