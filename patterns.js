@@ -153,6 +153,9 @@ function updatePattern() {
 		patternBox.removeChild(br);
 	}
 	rangy.restoreSelection(sel);
+	if (patternBox.textContent === "") {
+		patternBox.innerHTML = "";
+	}
 }
 
 function getMatch() {
