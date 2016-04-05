@@ -39,7 +39,6 @@ if test:find("[%[{}]") then\n\
 error("The characters [{} cannot be tested against on this site")\n\
 end\n\
 local newPattern = "()" .. pattern:gsub("([^%%])[()]", "%1()"):gsub("^%(", "()") .. "()"\n\
-print(newPattern)\n\
 local parens = {}\n\
 for t in pattern:gmatch("[()]") do\n\
 	table.insert(parens, t)\n\
@@ -116,6 +115,9 @@ function updateTest() {
 			.replace(/<span class="group".*?>|<\/span>/g, "");
 	}
 	rangy.restoreSelection(sel);
+	if (textBox.textContent === "") {
+		textBox.innerHTML = "";
+	}
 }
 
 function updatePattern() {
