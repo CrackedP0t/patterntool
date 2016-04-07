@@ -115,8 +115,8 @@ function updateTest() {
 			.replace(/<span class="group".*?>|<\/span>/g, "");
 	}
 	rangy.restoreSelection(sel);
-	if (textBox.textContent === "") {
-		textBox.innerHTML = "";
+	if (testBox.textContent.length == "") {
+		testBox.innerHTML = "";
 	}
 }
 
@@ -153,7 +153,7 @@ function updatePattern() {
 		patternBox.removeChild(br);
 	}
 	rangy.restoreSelection(sel);
-	if (patternBox.textContent === "") {
+	if (patternBox.textContent == "") {
 		patternBox.innerHTML = "";
 	}
 }
