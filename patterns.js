@@ -87,7 +87,7 @@ end';
 
 function updateTest() {
 	var test = testBox.textContent.replace(/\u00A0/g, " ");
-	var pattern = patternBox.textContent;
+	var pattern = patternBox.textContent.replace(/\u00A0/g, " ");
 	var sel = rangy.saveSelection();
 	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
 	var cursor = testBox.innerHTML
@@ -148,6 +148,7 @@ function updatePattern() {
 			+ newHTML.slice(cursor);
 	}
 	patternBox.innerHTML = newHTML
+		.replace(/ (?!([^<]+)?>)/g, "&nbsp;")
 		.replace(new RegExp('%(?:<span id="' + sspanid + '"><\/span>)?(\\w)', 'g'),
 				 function(match, cap) {
 					 if (escapes[cap]) {
@@ -166,9 +167,7 @@ function updatePattern() {
 }
 
 function getMatch() {
-	
 	updatePattern();
-
 	updateTest();
 }
 
