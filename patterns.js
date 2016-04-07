@@ -115,19 +115,26 @@ function updateTest() {
 			.replace(/<span class="group".*?>|<\/span>/g, "");
 	}
 	rangy.restoreSelection(sel);
-	if (testBox.textContent.length == "") {
-		testBox.innerHTML = "";
+	var br = $("#test > br");
+	if (br) {
+		testBox.removeChild(br);
 	}
 }
 
 function updatePattern() {
 	var text = patternBox.textContent;
-	var sel = rangy.saveSelection();
-	var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
-	var cursor = patternBox.innerHTML
-			.replace(/<span class="group".*?>|<\/span>/g, "")
-			.replace(/&nbsp;/g, " ")
-			.indexOf("<");
+	var focused = document.activeElement == patternBox;
+	if (focused) {
+		var sel = rangy.saveSelection();
+		var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
+	}
+
+	if (focused) {
+		var cursor = patternBox.innerHTML
+				.replace(/<span class="group".*?>|<\/span>/g, "")
+				.replace(/&nbsp;/g, " ")
+				.indexOf("<");
+	}
 	
 	var newHTML = text;
 
@@ -135,10 +142,11 @@ function updatePattern() {
 		return '<span class="doc" title="' + title + '">' + text + '</span>';
 	}
 
-	newHTML = newHTML.slice(0, cursor)
-		+ '<span id="' + sspanid + '"></span>'
-		+ newHTML.slice(cursor);
-	
+	if (focused) {
+		newHTML = newHTML.slice(0, cursor)
+			+ '<span id="' + sspanid + '"></span>'
+			+ newHTML.slice(cursor);
+	}
 	patternBox.innerHTML = newHTML
 		.replace(new RegExp('%(?:<span id="' + sspanid + '"><\/span>)?(\\w)', 'g'),
 				 function(match, cap) {
@@ -152,15 +160,16 @@ function updatePattern() {
 	if (br) {
 		patternBox.removeChild(br);
 	}
-	rangy.restoreSelection(sel);
-	if (patternBox.textContent == "") {
-		patternBox.innerHTML = "";
+	if (focused) {
+		rangy.restoreSelection(sel);
 	}
 }
 
 function getMatch() {
-	updateTest();
+	
 	updatePattern();
+
+	updateTest();
 }
 
 patternBox.oninput = getMatch;
