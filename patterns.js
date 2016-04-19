@@ -11,6 +11,8 @@ var escapes = {
 	"G": "The space character",
 	"l": "Any lowercase letter",
 	"L": "Any non-lowercase character",
+	"s": "The space character",
+	"S": "Any non-space character",
 	"u": "Any uppercase letter",
 	"U": "Any non-uppercase character",
 	"x": "Any hexadecimal digit",
@@ -155,17 +157,13 @@ function updatePattern(worked) {
 		.replace(/ (?!([^<]+)?>)/g, "&nbsp;")
 		.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([^<])', 'g'),
 				 function(match, cap) {
-					 console.log(cap);
-					 if (cap) {
-						 if (escapes[cap]) {
-							 return makeSpan(escapes[cap], match);
-						 } else {
-							 return makeSpan('The character \'' + cap + '\'', match);
-						 }
+					 if (escapes[cap]) {
+						 return makeSpan(escapes[cap], match);
 					 } else {
-						 return match
+						 return makeSpan('The character \'' + cap + '\'', match);
 					 }
-				 });
+				 }
+				);
 	var br = $("#pattern > br");
 	if (br) {
 		patternBox.removeChild(br);
