@@ -27,60 +27,63 @@ Lua.initialize();
 
 function prepTest() {
 	var code = `function(pattern, test, cursor)
-return pcall(function()
-if not test:find(pattern) then
-if cursor > -1 then
-return test:sub(0, cursor) .. "|" .. test:sub(cursor + 1)
-else
-return test
-end
-end
-if test:find("[%[{}]") then
-error("The characters [{} cannot be tested against on this site")
-end
-local newPattern = "()" .. pattern:gsub("([^%%])[()]", "%1()"):gsub("^%(", "()") .. "()"
-local parens = {}
-for t in pattern:gmatch("[()]") do
-	table.insert(parens, t)
-end
-local out = test:gsub(newPattern, function(...)
-						  local captures = {...}
-						  local pos = table.remove(captures, 1)
-						  local epos = table.remove(captures)
-						  if pos ~= epos then
-							  local count = 0
-							  local newmatch = ""
-							  local e = pos
-							  for i, v in ipairs(captures) do
-								  local kind = parens[i]
-								  count = count + (kind == "(" and 1 or 0)
-								  newmatch = newmatch .. test:sub(e, v - 1)
-									  .. (kind == "(" and "[" .. count .. ")" or "]")
-								  e = v
-							  end
-							  newmatch = newmatch .. test:sub(e, epos - 1)
-							  newmatch = "{" .. newmatch .. "}"
-							  return newmatch
-						  end
-end)
-if cursor > -1 then
-local apos = 0
-local i = 0
-while apos <= cursor do
-	local char = out:sub(i, i)
-	if not char:find("[%[%]{}]") then
-		apos = apos + 1
-	end
-	if char == "[" and out:sub(i+1, i+1):find("%d") and out:sub(i+2, i+2) == ")" then
-		i = i + 3
-	else
-		i = i + 1
-	end
-end
-out = out:sub(0, i - 1) .. "|" .. out:sub(i)
-end
-return out
-end)
+	return pcall(function()
+			if test:find("[%[{}]") then
+				error("the characters [{} cannot be tested against on this site")
+			end
+			if pattern:find("%%%d") then
+				error("capture matching (e.g. '%1') is not supported on this site")
+			end
+			if not test:find(pattern) then
+				if cursor > -1 then
+					return test:sub(0, cursor) .. "|" .. test:sub(cursor + 1)
+				else
+					return test
+				end
+			end
+			local newPattern = "()" .. pattern:gsub("([^%%])[()]", "%1()"):gsub("^%(", "()") .. "()"
+			local parens = {}
+			for t in pattern:gmatch("[()]") do
+				table.insert(parens, t)
+			end
+			local out = test:gsub(newPattern, function(...)
+									  local captures = {...}
+									  local pos = table.remove(captures, 1)
+									  local epos = table.remove(captures)
+									  if pos ~= epos then
+										  local count = 0
+										  local newmatch = ""
+										  local e = pos
+										  for i, v in ipairs(captures) do
+											  local kind = parens[i]
+											  count = count + (kind == "(" and 1 or 0)
+											  newmatch = newmatch .. test:sub(e, v - 1)
+												  .. (kind == "(" and "[" .. count or "]")
+											  e = v
+										  end
+										  newmatch = newmatch .. test:sub(e, epos - 1)
+										  newmatch = "{" .. newmatch .. "}"
+										  return newmatch
+									  end
+			end)
+			if cursor > -1 then
+				local apos = 0
+				local i = 0
+				while apos <= cursor do
+					local char = out:sub(i, i)
+					if not char:find("[%[%]{}]") then
+						apos = apos + 1
+					end
+					if char == "[" and out:sub(i+1, i+1):find("%d") then
+						i = i + 2
+					else
+						i = i + 1
+					end
+				end
+				out = out:sub(0, i - 1) .. "|" .. out:sub(i)
+			end
+			return out
+	end)
 end`;
 	return code;
 }
@@ -104,7 +107,7 @@ function updateTest() {
 			.replace(/{/g, '<span class="group" data-level="0">')
 			.replace(/}/g, "</span>")
 			.replace(/\|/g, '<span id="' + sspanid + '"></span>')
-			.replace(/\[(\d)\)/g, '<span class="group" data-level="$1">')
+			.replace(/\[(\d)/g, '<span class="group" data-level="$1">')
 			.replace(/\]/g, '</span>');
 		testBox.innerHTML = newHTML;
 	} else {
@@ -119,9 +122,10 @@ function updateTest() {
 	if (br) {
 		testBox.removeChild(br);
 	}
+	return worked;
 }
 
-function updatePattern() {
+function updatePattern(worked) {
 	var text = patternBox.textContent;
 	var focused = document.activeElement == patternBox;
 	if (focused) {
@@ -149,16 +153,19 @@ function updatePattern() {
 	}
 	patternBox.innerHTML = newHTML
 		.replace(/ (?!([^<]+)?>)/g, "&nbsp;")
-		.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([a-zA-Z])', 'g'),
+		.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([^<])', 'g'),
 				 function(match, cap) {
-					 console.log(match);
-					 if (escapes[cap]) {
-						 return makeSpan(escapes[cap], match);
+					 console.log(cap);
+					 if (cap) {
+						 if (escapes[cap]) {
+							 return makeSpan(escapes[cap], match);
+						 } else {
+							 return makeSpan('The character \'' + cap + '\'', match);
+						 }
 					 } else {
-						 return makeSpan('The character \'' + cap + '\'"', match);
+						 return match
 					 }
 				 });
-	console.log(patternBox.innerHTML);
 	var br = $("#pattern > br");
 	if (br) {
 		patternBox.removeChild(br);
@@ -169,8 +176,7 @@ function updatePattern() {
 }
 
 function getMatch() {
-	updatePattern();
-	updateTest();
+	updatePattern(updateTest());
 }
 
 patternBox.oninput = getMatch;
