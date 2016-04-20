@@ -1,6 +1,7 @@
 var $ = function(s) {return document.querySelector(s);};
 
 var escapes = {
+	" ": "The space character",
 	"a": "Any letter",
 	"A": "Any non-letter character",
 	"c": "Any control character",
@@ -28,7 +29,7 @@ var errorSpan = $("#error");
 Lua.initialize();
 
 function prepTest() {
-	var code = `function(pattern, test, cursor)
+	return `function(pattern, test, cursor)
 	return pcall(function()
 			if test:find("[%[{}]") then
 				error("the characters [{} cannot be tested against on this site")
@@ -87,7 +88,6 @@ function prepTest() {
 			return out
 	end)
 end`;
-	return code;
 }
 
 function updateTest() {
@@ -128,7 +128,7 @@ function updateTest() {
 }
 
 function updatePattern(worked) {
-	var text = patternBox.textContent;
+	var newHTML = patternBox.textContent;
 	var focused = document.activeElement == patternBox;
 	if (focused) {
 		var sel = rangy.saveSelection();
@@ -137,12 +137,10 @@ function updatePattern(worked) {
 
 	if (focused) {
 		var cursor = patternBox.innerHTML
-				.replace(/<span class="group".*?>|<\/span>/g, "")
+				.replace(/<span class="doc".*?>|<\/span>/g, "")
 				.replace(/&nbsp;/g, " ")
-				.indexOf("<");
+				.indexOf('<span');
 	}
-	
-	var newHTML = text;
 
 	function makeSpan(title, text) {
 		return '<span class="doc" title="' + title + '">' + text + '</span>';
@@ -154,7 +152,6 @@ function updatePattern(worked) {
 			+ newHTML.slice(cursor);
 	}
 	patternBox.innerHTML = newHTML
-		.replace(/ (?!([^<]+)?>)/g, "&nbsp;")
 		.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([^<])', 'g'),
 				 function(match, cap) {
 					 if (escapes[cap]) {
@@ -162,12 +159,13 @@ function updatePattern(worked) {
 					 } else {
 						 return makeSpan('The character \'' + cap + '\'', match);
 					 }
-				 }
-				);
-	var br = $("#pattern > br");
-	if (br) {
-		patternBox.removeChild(br);
-	}
+				 })
+		.replace(new RegExp('%<(!span id="' + sspanid + '"></span>)', 'g'),
+				 function(match, cap) {
+					 return makeSpan('The character \'<\'', match);
+				 })
+				
+		.replace(/ (?!([^<]+)?>)/g, "&nbsp;");
 	if (focused) {
 		rangy.restoreSelection(sel);
 	}
