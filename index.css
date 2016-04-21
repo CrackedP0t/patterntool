@@ -1,3 +1,8 @@
+.description {
+	color: grey;
+	font-style: italic;
+}
+
 .edit {
 	font-size: 15pt;
 	outline: 2pt solid navy;

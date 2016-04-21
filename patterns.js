@@ -31,8 +31,8 @@ Lua.initialize();
 function prepTest() {
 	return `function(pattern, test, cursor)
 	return pcall(function()
-			if test:find("[%[{}]") then
-				error("the characters [{} cannot be tested against on this site")
+			if test:find("[%[{}()]") then
+				error("the characters [{}() cannot be tested against on this site")
 			end
 			if pattern:find("%%%d") then
 				error("capture matching (e.g. '%1') is not supported on this site")
@@ -108,7 +108,7 @@ function updateTest() {
 			.replace(/ /g, "&nbsp;")
 			.replace(/{/g, '<span class="group" data-level="0">')
 			.replace(/}/g, "</span>")
-			.replace(/\|/g, '<span id="' + sspanid + '"></span>')
+			.replace(/\|/, '<span id="' + sspanid + '"></span>')
 			.replace(/\[(\d)/g, '<span class="group" data-level="$1">')
 			.replace(/\]/g, '</span>');
 		testBox.innerHTML = newHTML;
@@ -129,49 +129,46 @@ function updateTest() {
 
 function updatePattern(worked) {
 	var newHTML = patternBox.textContent;
-	var focused = document.activeElement == patternBox;
-	if (focused) {
+	if (document.activeElement == patternBox) {
 		var sel = rangy.saveSelection();
 		var sspanid = document.getElementsByClassName("rangySelectionBoundary")[0].id;
-	}
 
-	if (focused) {
 		var cursor = patternBox.innerHTML
 				.replace(/<span class="doc".*?>|<\/span>/g, "")
 				.replace(/&nbsp;/g, " ")
 				.indexOf('<span');
-	}
 
-	function makeSpan(title, text) {
-		return '<span class="doc" title="' + title + '">' + text + '</span>';
-	}
-
-	if (focused) {
 		newHTML = newHTML.slice(0, cursor)
 			+ '<span id="' + sspanid + '"></span>'
 			+ newHTML.slice(cursor);
-	}
-	patternBox.innerHTML = newHTML
-		.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([^<])', 'g'),
-				 function(match, cap) {
-					 if (escapes[cap]) {
-						 return makeSpan(escapes[cap], match);
-					 } else {
-						 return makeSpan('The character \'' + cap + '\'', match);
-					 }
-				 })
-		.replace(new RegExp('%<(!span id="' + sspanid + '"></span>)', 'g'),
-				 function(match, cap) {
-					 return makeSpan('The character \'<\'', match);
-				 })
+	
+
+		function makeSpan(title, text) {
+			return '<span class="doc" title="' + title + '">' + text + '</span>';
+		}
+
+		patternBox.innerHTML = newHTML
+			.replace(new RegExp('%(?:<span id="' + sspanid + '"></span>)?([^<])', 'g'),
+					 function(match, cap) {
+						 if (escapes[cap]) {
+							 return makeSpan(escapes[cap], match);
+						 } else {
+							 return makeSpan('The character \'' + cap + '\'', match);
+						 }
+					 })
+			.replace(new RegExp('%<(!span id="' + sspanid + '"></span>)', 'g'),
+					 function(match, cap) {
+						 return makeSpan('The character \'<\'', match);
+					 })
 				
-		.replace(/ (?!([^<]+)?>)/g, "&nbsp;");
-	if (focused) {
+			.replace(/ (?!([^<]+)?>)/g, "&nbsp;");
+
 		rangy.restoreSelection(sel);
 	}
 }
 
-function getMatch() {
+function getMatch(e) {
+	console.log(e);
 	updatePattern(updateTest());
 }
 
